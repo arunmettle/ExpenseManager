@@ -1,0 +1,135 @@
+﻿@model IEnumerable<ExpenseManager.Models.SpendLimit>
+
+@{
+    ViewData["Title"] = "ExpenseManager";
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.css" rel="stylesheet">
+
+<h2>Expense Manager - Spending Limit</h2>
+<br />
+<div>
+    <div style="float:left">
+        <button class="btn btn-primary" onclick="AddEditSpend(@(string.Format("'{0}'",Model.FirstOrDefault().UserName)))">Add Spending</button>
+    </div>
+</div>
+<br />
+<br />
+@{ if (Model.FirstOrDefault().ItemId != 0 && Model.FirstOrDefault().SpendingCap!=0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.StartDate)</th>
+                    <th>@Html.DisplayNameFor(model => model.EndDate)</th>
+                    <th>@Html.DisplayNameFor(model => model.SpendingCap)</th>
+                    <th>Weekly/Monthly</th>
+                    <th>Action Item</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                        <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
+                        <td>@Html.DisplayFor(modelItem => item.SpendingCap)</td>
+                        <td>@(Model.FirstOrDefault().IsWeekly?"Weekly":"Monthly")</td>
+                        <td>
+                            <button class="btn btn-default" onclick="AddEditSpend(@(string.Format("'{0}'",item.UserName)))">Edit</button>
+                            <button class="btn btn-danger" onclick="DeleteSpend(@(string.Format("'{0}'",item.UserName)))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+}
+
+
+<div class="modal fade" id="spendLimitFormModel" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="title" class="modal-title">Add Expense</h3>
+                <a href="#" class="close" data-dismiss="modal">&times;</a>
+            </div>
+            <div class="modal-body" id="spendLimitFormModelDiv">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var AddEditSpend = function (userName) {
+        var url = "/SpendingLimit/AddEditSpend?userName=" + userName;
+        if (userName > 0)
+            $('#title').html("Edit Expense");
+
+        $("#spendLimitFormModelDiv").load(url, function () {
+            $("#spendLimitFormModel").modal("show");
+
+        });
+
+        $('#spendLimitFormModel').on('shown.bs.modal', function () {
+
+            $('#calender-container1 .input-group.date').datepicker({
+                format: 'dd/mm/yyyy',
+                todayBtn: true,
+                calendarWeeks: true,
+                todayHighlight: true,
+                autoclose: true,
+                container: '#spendLimitFormModel modal-body'
+            });
+            $('#calender-container2 .input-group.date').datepicker({
+                format: 'dd/mm/yyyy',
+                todayBtn: true,
+                calendarWeeks: true,
+                todayHighlight: true,
+                autoclose: true,
+                container: '#spendLimitFormModel modal-body'
+            });
+        });
+    }
+
+    var DeleteSpend = function (userName) {
+
+        var ans = confirm("Do you want to delete current spending cap");
+
+        if (ans) {
+            $.ajax({
+                type: "POST",
+                url: "/SpendingLimit/Delete/?userName=" + userName,
+                success: function () {
+                    window.location.href = "/SpendingLimit/Index";
+                }
+            })
+        }
+    }
+</script>
+
+<script>
+
+    $('body').on('click', "#btnSubmit", function () {
+        var myformdata = $("#spendLimitForm").serialize();
+
+        $.ajax({
+            type: "POST",
+            url: "/SpendingLimit/Create",
+            data: myformdata,
+            success: function () {
+                $("#myModal").modal("hide");
+                window.location.href = "/SpendingLimit/Index";
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        })
+    })
+</script>

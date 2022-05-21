@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using ExpenseManager.Areas.Identity.Data
+
+@inject SignInManager<ApplicationrUser> SignInManager
+@inject UserManager<ApplicationrUser> UserManager
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+
+<div class="card" style="display: flex;justify-content: center;align-items: center;height: 500px;">
+    <div class="card-body" style="display: flex;flex-direction: column;align-items: center;justify-content: center;">
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <a class="btn btn-primary btn-lg active" role="button" aria-pressed="true" asp-area="" asp-controller="Expense" asp-action="Index" style="margin-bottom: 65px;">Manage Expense</a>
+            <a class="btn btn-secondary btn-lg active" role="button" aria-pressed="true" asp-area="" asp-controller="SpendingLimit" asp-action="Index">Manage SpendLimit</a>
+        }
+    </div>
+</div>
